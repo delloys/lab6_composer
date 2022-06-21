@@ -7,7 +7,7 @@ use Monolog\Handler\StreamHandler;
 echo dirname(__DIR__);
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
-$logsPath = "/var/www/html/composer/log/messages.log";
+$logsPath = "/var/www/html/composer/log/data.log";
 $loader = new FilesystemLoader(dirname(__DIR__) . "/template/");
 $log = new Logger('log');
 $loggerHandler = new StreamHandler($logsPath, Logger::INFO);
@@ -22,7 +22,7 @@ $users = [
 
 if (isset($_GET['logs'])) {
     echo("Логи: ");
-    $file = file_get_contents("/var/www/html/composer/log/messages.log");
+    $file = file_get_contents("/var/www/html/composer/log/data.log");
     $Nfile = "\n$file";
     $ArrFile = array($Nfile);
     echo '<pre>';
@@ -31,9 +31,12 @@ if (isset($_GET['logs'])) {
 }
 
 function add_msg($login, $message){
-    $newMessage = json_decode(file_get_contents("messages.json"),true);
-    $newMessage['messages'] [] = ['date' => date('d.m.y h:i:s'),'user'=>$login, 'message' => $message];
-    file_put_contents("messages.json",json_encode($newMessage));
+    if ($message !== '') {
+        $info = json_decode(file_get_contents('data.json'));
+        $newMessage = (object)['date' => date('d.m.y h:i:s'), 'user' => $login, 'message' => $message];
+        $info[] = $newMessage;
+        file_put_contents('data.json', json_encode($info));
+    }
 }
 
 function print_msgs(){
